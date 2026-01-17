@@ -1,0 +1,65 @@
+.math-keyboard {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    /* Ensure it doesn't shrink below valid usability */
+    min-width: 320px; 
+    box-sizing: border-box;
+}
+
+.wide-layout {
+    grid-template-columns: repeat(7, 1fr);
+    max-width: 900px; /* Slightly wider to accommodate comfortable keys */
+    margin: 0 auto;
+    border-radius: 12px;
+    /* Force width to retain shape even if content is small */
+    width: 100%; 
+}
+
+.key {
+    background: #2a2a2a;
+    color: var(--text-primary);
+    border: none;
+    border-radius: 6px;
+    padding: 0;
+    height: 48px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.1s;
+    user-select: none;
+    font-family: var(--font-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.key:active {
+    background: #404040;
+}
+
+.key-op {
+    background: #333;
+    color: var(--accent-color);
+}
+
+.key-action {
+    background: #442222;
+}
+
+.key-enter {
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    font-weight: bold;
+}
+
+/* Landscape Mobile or Desktop */
+@media (min-width: 700px) {
+    .key {
+        height: 55px;
+        font-size: 1.2rem;
+    }
+}

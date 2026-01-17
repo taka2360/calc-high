@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "katex": "^0.16.27",
+    "prop-types": "^15.8.1",
+    "tailwind-merge": "^3.4.0"
+  }
+}

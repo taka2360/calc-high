@@ -1,0 +1,227 @@
+/* ... Existing layout styles ... */
+.start-screen {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+.start-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 5px;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.topics-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.topic-category {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.subtopic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.8rem;
+}
+
+/* Custom Checkbox Styling */
+.subtopic-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.05); /* Lighter background */
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    user-select: none;
+    border: 1px solid transparent;
+}
+
+/* Hide default checkbox */
+.subtopic-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--text-secondary);
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    position: relative;
+}
+
+/* Checked state */
+.subtopic-item.selected {
+    color: #fff;
+    background: rgba(0, 224, 255, 0.15);
+    border-color: rgba(0, 224, 255, 0.4);
+    box-shadow: 0 0 10px rgba(0, 224, 255, 0.1);
+}
+
+.subtopic-item.selected input[type="checkbox"] {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+/* Checkmark using pseudo-element */
+.subtopic-item.selected input[type="checkbox"]::after {
+    content: '✔';
+    font-size: 12px;
+    color: var(--bg-primary);
+    font-weight: bold;
+}
+
+.category-header label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.category-header input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--text-secondary);
+    border-radius: 4px;
+    background: transparent;
+}
+.category-header input[type="checkbox"]:checked {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 8px var(--accent-color);
+}
+
+
+/* Sidebar & Settings */
+.sidebar-section {
+    background: rgba(0,0,0,0.3);
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.setting-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.count-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.count-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.count-btn.wide {
+    width: auto;
+    padding: 0 1.2rem;
+    font-size: 0.9rem;
+}
+
+.count-btn:hover {
+    border-color: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.05);
+}
+
+.count-btn.active {
+    background: var(--accent-color);
+    color: var(--bg-primary);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(0, 224, 255, 0.3);
+}
+
+.start-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--accent-color), #00a8ff);
+    color: var(--bg-primary);
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,224,255,0.3);
+    transition: transform 0.1s;
+}
+
+.start-btn:active {
+    transform: scale(0.98);
+}
+
+.debug-toggle {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Wide Screen Layout */
+@media (min-width: 900px) {
+    .start-content-wrapper {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .start-main-col {
+        flex: 3;
+    }
+
+    .start-sidebar-col {
+        flex: 1;
+        position: sticky;
+        top: 20px;
+    }
+
+    .topics-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+    }
+}
+
+@media (min-width: 1200px) {
+    .topics-container {
+        grid-template-columns: repeat(3, 1fr); 
+    }
+}

@@ -1,0 +1,96 @@
+/* Existing CSS... */
+.result-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    width: 100%;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.rank-display {
+    font-size: 6rem;
+    font-weight: 900;
+    line-height: 1;
+    text-shadow: 0 0 30px currentColor;
+    margin-bottom: 10px;
+}
+
+.rank-S { color: #ffd700; } /* Gold */
+.rank-A { color: #ff4d4d; } /* Red */
+.rank-B { color: #00e0ff; } /* Cyan */
+.rank-C { color: #00ff00; } /* Green */
+.rank-D { color: #888; }    /* Grey */
+
+.score-summary {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    justify-content: center;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 12px;
+    min-width: 100px;
+    flex: 1;
+    max-width: 150px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-item .label { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; }
+.summary-item .value { font-size: 1.5rem; font-weight: bold; color: var(--accent-color); }
+
+.result-details {
+    width: 100%;
+    flex: 1;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    min-height: 0;
+}
+
+.detail-row {
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+}
+.detail-row.correct { border-left: 3px solid #00e0ff; }
+.detail-row.timeover { border-left: 3px solid #ff4d4d; background: rgba(255, 77, 77, 0.1); }
+
+.row-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.result-actions {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.action-btn {
+    padding: 1rem 3rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    min-width: 150px;
+}
+.retry-btn { background: linear-gradient(135deg, var(--accent-color), #00a8ff); color: var(--bg-primary); }
+.home-btn { background: transparent; border: 2px solid var(--text-secondary); color: var(--text-secondary); }
