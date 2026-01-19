@@ -21,8 +21,11 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          # キャッシュを有効にするためにpackage-lock.jsonの場所を指定
+          cache-dependency-path: './math-high-speed/package-lock.json'
 
       - name: Install dependencies
+        working-directory: ./math-high-speed
         run: npm install
 
       - name: Build
