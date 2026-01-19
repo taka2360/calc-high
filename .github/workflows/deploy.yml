@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # mainブランチにPushされた時に実行
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -21,17 +21,22 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          # キャッシュを有効にするためにpackage-lock.jsonの場所を指定
+          cache-dependency-path: './math-high-speed/package-lock.json'
 
       - name: Install dependencies
+        working-directory: ./math-high-speed
         run: npm install
 
       - name: Build
+        working-directory: ./math-high-speed
         run: npm run build
 
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist' # Viteのビルド出力先（React公式なら'build'）
+          # ビルド結果が出力される場所を指定
+          path: './math-high-speed/dist'
 
   deploy:
     needs: build_site
