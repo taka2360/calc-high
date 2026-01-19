@@ -25,8 +25,6 @@ export const ALL_TOPICS = {
 };
 
 export const generateProblem = (selectedSubtopicIds, config = {}) => {
-    let availableFuncs = [];
-    
     const lookup = {};
     Object.values(ALL_TOPICS).forEach(cat => {
         Object.entries(cat.subtopics).forEach(([k, v]) => {
@@ -38,37 +36,36 @@ export const generateProblem = (selectedSubtopicIds, config = {}) => {
         selectedSubtopicIds = Object.keys(lookup);
     }
     
-    availableFuncs = selectedSubtopicIds
+    const availableFuncs = selectedSubtopicIds
         .filter(id => lookup[id])
         .map(id => ({ id, ...lookup[id] }));
 
     if (availableFuncs.length === 0) {
-        return mathIaGens['quad_eq'].func();
+        return mathIaGens['quad_eq'].func(2, 'Normal');
     }
 
     const selected = availableFuncs[getRandomInt(0, availableFuncs.length - 1)];
     
-    // Pass config object OR flattened params
-    // Some gens take (digits), others will take (difficulty).
-    // Let's standardize: func(config) or func(arg1, arg2...)
-    // Previously arith took (digits).
-    // Let's pass config to all, and update arith to read config.digits.
-    // OR: pass (difficulty, extra)
-    
-    // Legacy support: arith func(d).
-    // Let's update arithmetic.js first to accept object or just pass digits and difficulty separately?
-    // Easiest: func(config)
-    
-    // But updating ALL generator signatures is risky if I miss one.
-    // Javascript functions ignore extra args.
-    // So if I pass (config.digits, config.difficulty), standard gens receiving () will ignore.
-    // Arith receiving (d) will work.
-    // New gens can receive (d, difficulty).
-    
-    const digits = config.digits || 2;
     const diff = config.difficulty || 'Normal';
     
+    // Default digits is single value or array?
+    // Old logic: digits = 2.
+    // New logic: digits = [d1, d2] for Arithmetic.
+    
+    let digits = config.digits || 2; 
+
+    // Special handling for Arithmetic
+    if (selected.id.startsWith('arith_') && config.arithmetic) {
+        const parts = selected.id.split('_'); 
+        if (parts.length >= 2) {
+            const type = parts[1]; // 'add', 'sub', 'mul', 'div'
+            if (config.arithmetic[type]) {
+                digits = config.arithmetic[type]; // This is now an array [d1, d2]
+            }
+        }
+    }
+    
     const problem = selected.func(digits, diff);
-    problem.id = `${problem.id}_${Date.now()}`;
+    problem.id = `${problem.id}_${Date.now()}`; 
     return problem;
 };

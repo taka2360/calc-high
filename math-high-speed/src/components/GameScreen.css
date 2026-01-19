@@ -1,14 +1,31 @@
+/* ... Previous styles ... */
+/* Retaining existing styles, updating .latex-question and adding media queries */
+
 .game-screen {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 800px; 
-    margin: 0 auto;
-    height: 100vh; /* Full viewport height */
+    height: 100vh; 
     padding: 10px;
     box-sizing: border-box;
     position: relative;
-    overflow: hidden; /* Prevent body scroll */
+    overflow: hidden; 
+}
+
+.game-home-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 10;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+.game-home-btn:hover {
+    opacity: 1;
 }
 
 .game-header {
@@ -16,7 +33,8 @@
     flex-direction: column;
     gap: 8px;
     margin-bottom: 20px;
-    flex-shrink: 0; /* Header doesn't shrink */
+    flex-shrink: 0; 
+    padding-top: 2rem; 
 }
 
 .progress-info {
@@ -40,33 +58,52 @@
 }
 
 .question-area {
-    flex: 1; /* Takes available space */
+    flex: 1; 
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     margin-bottom: 10px;
     width: 100%;
-    overflow-y: auto; /* Scroll if question is HUGE */
-    min-height: 0; /* Flexbox trick for nested scroll */
+    overflow-y: auto; 
+    min-height: 0; 
+    padding: 0 10px; /* Safety padding */
 }
 
+/* RESPONSIVE TEXT SIZE */
 .latex-question {
-    font-size: 2.5rem; /* Slightly larger */
+    font-size: 2.5rem; 
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     text-align: center;
     padding: 1rem;
+    word-break: break-word; 
+    width: 100%; /* Ensure it respects container */
+}
+
+/* Narrow screens (Mobile Portrait) */
+@media (max-width: 480px) {
+    .latex-question {
+        font-size: 1.4rem; /* Significantly smaller */
+        padding: 0.5rem;
+    }
+}
+
+/* Small Tablets / Large Phones */
+@media (min-width: 481px) and (max-width: 768px) {
+    .latex-question {
+        font-size: 1.8rem;
+    }
 }
 
 .answer-display {
-    flex-shrink: 0; /* Fixed size */
+    flex-shrink: 0; 
     background: rgba(255, 255, 255, 0.05);
     padding: 0.5rem;
     margin-bottom: 0.5rem;
     border-bottom: 2px solid var(--text-primary);
     text-align: center;
     font-size: 1.8rem;
-    height: 3.5rem; /* Fixed height! */
+    height: 3.5rem; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -94,7 +131,6 @@
     font-size: 1.2rem;
 }
 
-/* Debug elements */
 .debug-panel {
     margin-top: 1rem;
     font-size: 0.8rem;
@@ -114,7 +150,6 @@
     cursor: pointer;
 }
 
-/* Combo Styling */
 .combo-display {
     position: absolute;
     top: 60px;
@@ -125,9 +160,10 @@
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
     transform: rotate(-5deg);
     pointer-events: none;
+    z-index: 5;
 }
 
-/* Keyboard Container Fix */
-/* MathKeyboard component handles its grid, but we ensure the parent allows it to be fixed bottom-ish if needed */
-/* Since we use flex col, and question-area flex:1, keyboard naturally sits at bottom. */
-/* Just ensure MathKeyboard itself has flex-shrink: 0 implicitly or explicitly */
+.keyboard-container {
+    flex-shrink: 0;
+    width: 100%;
+}

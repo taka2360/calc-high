@@ -10,7 +10,6 @@ function App() {
   const [results, setResults] = useState([]);
   
   // Store the last used config to restore it on "Home" or use it for "Retry"
-  // Initialize with defaults if needed, but StartScreen handles defaults.
   const [savedConfig, setSavedConfig] = useState(null);
 
   const handleStart = (config) => {
@@ -39,7 +38,6 @@ function App() {
     setScreen('start');
     setResults([]);
     setGameConfig(null);
-    // savedConfig remains populated, passed to StartScreen
   };
 
   return (
@@ -58,7 +56,13 @@ function App() {
                 initialConfig={savedConfig} 
             />
         )}
-        {screen === 'game' && <GameScreen config={gameConfig} onFinish={handleFinish} />}
+        {screen === 'game' && (
+            <GameScreen 
+                config={gameConfig} 
+                onFinish={handleFinish} 
+                onHome={handleHome} // Passed here
+            />
+        )}
         {screen === 'result' && (
             <ResultScreen 
                 results={results} 

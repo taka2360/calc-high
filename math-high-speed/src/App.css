@@ -1,14 +1,44 @@
+#root {
+  margin: 0 auto;
+  text-align: center;
+  width: 80vw;
+}
+
 .app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  width: 80vw;
+}
+
+/* Wide screen optimization: Just width, no borders */
+@media (min-width: 768px) {
+  .app-container {
+      width: 80vw;
+      margin: 0 auto;
+      min-height: 100vh;
+      /* Borders removed as requested */
+      border: none;
+      box-shadow: none;
+  }
+}
+
+.app-header {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.app-main {
+  flex: 1;
+  padding: 0; 
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-}
-
-.app-header h1 {
-  font-weight: normal;
-  letter-spacing: 0.1em;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.5rem;
-  margin-bottom: 2rem;
+  justify-content: flex-start;
+  width: 80vw;
+  overflow: hidden; 
 }

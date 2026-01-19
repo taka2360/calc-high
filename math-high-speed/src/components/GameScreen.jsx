@@ -19,7 +19,7 @@ const formatInputDisplay = (raw) => {
         .replace(/\\frac/g, 'frac');
 };
 
-const GameScreen = ({ config, onFinish }) => {
+const GameScreen = ({ config, onFinish, onHome }) => { // Added onHome
     const [problems, setProblems] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [userInput, setUserInput] = useState('');
@@ -64,17 +64,6 @@ const GameScreen = ({ config, onFinish }) => {
         const currentProblem = problems[currentIndex];
         const effectiveTime = isTimeOver ? (TIME_LIMIT + 1) : (TIME_LIMIT - timeLeft);
         
-        // Update Combo
-        // Combo breaks if TimeOver or Skipped.
-        // What about Wrong attempt earlier? 
-        // Usually Combo = Consecutive First-Try Corrects?
-        // Or Consecutive "Passed without TimeOver"?
-        // Let's say: If TimeOver, Combo breaks. If Answered correctly (even with retries), Combo keeps?
-        // Hardcore: Combo resets on Wrong.
-        // Let's be lenient: Combo resets on TimeOver. (Mental math trainer).
-        // Actually, user said "Time Over -> bar flashes".
-        // Let's reset combo if `isTimeOver` became true.
-        
         let newCombo = combo;
         if (skipped || isTimeOver) {
             newCombo = 0;
@@ -118,7 +107,7 @@ const GameScreen = ({ config, onFinish }) => {
             finishQuestion(true);
         } else {
             setIsWrong(true);
-            setCombo(0); // Optional: Reset combo on wrong attempt too? Yes, for "Math High Speed".
+            setCombo(0); 
             setTimeout(() => setIsWrong(false), 500);
         }
     };
@@ -147,6 +136,8 @@ const GameScreen = ({ config, onFinish }) => {
 
     return (
         <div className="game-screen">
+            <button className="game-home-btn" onClick={onHome}>🏠</button>
+            
             <div className="game-header">
                 <div className="progress-info">
                     Q {currentIndex + 1} / {problems.length}
@@ -188,9 +179,6 @@ const GameScreen = ({ config, onFinish }) => {
                     exit={{ opacity: 0, x: -50 }}
                     transition={{ duration: 0.3 }}
                 >
-                    {/* Hide Label as requested */}
-                    {/* <div className="subtopic-label">{currentProblem.subtopic}</div> */}
-                    
                     <div className="latex-question">
                         <LatexRenderer latex={currentProblem.question} />
                     </div>
@@ -214,13 +202,13 @@ const GameScreen = ({ config, onFinish }) => {
                 </span>
             </motion.div>
              
-            {/* Minimalist: No text feedback */}
-            
-            <MathKeyboard 
-                onInput={handleInput} 
-                onDelete={handleDelete}
-                onSubmit={submitAnswer}
-            />
+            <div className="keyboard-container">
+                <MathKeyboard 
+                    onInput={handleInput} 
+                    onDelete={handleDelete}
+                    onSubmit={submitAnswer}
+                />
+            </div>
         </div>
     );
 };

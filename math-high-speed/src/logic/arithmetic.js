@@ -1,58 +1,119 @@
 import { getRandomInt } from './utils.js';
 
-// digits: number (1-5), difficulty: 'Easy'|'Normal'|'Hard'
-export const generateArithmetic = (digits = 1, difficulty = 'Normal', opType = 'add') => {
-    // Difficulty can slightly tweak "digits" or complexity?
-    // User requested "digits" explicitly in config.
-    // So difficulty shouldn't override digits.
-    // Maybe difficulty affects "simple numbers" vs "complex numbers"?
-    // Easy: Avoid carry over? (Too hard to logic).
-    // Hard: No change?
-    // Let's largely rely on digits for Arithmetic.
-    // Maybe Hard allows negatives for Sub?
-    
-    const min = Math.pow(10, digits - 1);
-    const max = Math.pow(10, digits) - 1;
+// digits: number OR [number, number]
+export const generateArithmetic = (digitsConfig = 1, difficulty = 'Normal', opType = 'add') => {
+    // Parse digits configuration
+    let d1, d2;
+    if (Array.isArray(digitsConfig)) {
+        d1 = digitsConfig[0];
+        d2 = digitsConfig[1];
+    } else {
+        d1 = digitsConfig;
+        d2 = digitsConfig;
+    }
 
-    let v1 = getRandomInt(min, max);
-    let v2 = getRandomInt(min, max);
+    const getRange = (d) => {
+        const min = Math.pow(10, d - 1);
+        const max = Math.pow(10, d) - 1;
+        return [min, max];
+    };
+
+    let v1 = getRandomInt(...getRange(d1));
+    let v2 = getRandomInt(...getRange(d2));
     
     let ans, operator;
 
     switch(opType) {
         case 'sub':
             operator = '-';
-            if (difficulty !== 'Hard' && v2 > v1) [v1, v2] = [v2, v1]; // No negative unless Hard
+            // If strictly positive result required? usually yes.
+            // If Hard, negative allowed.
+            if (difficulty !== 'Hard') {
+                // Ensure v1 >= v2.
+                // But if user requested 1 digit - 3 digits? Result is neg.
+                // If config explicitly asks for d1 < d2, we allow neg.
+                // If config allows random swap, we might swap.
+                // Here, user explicitly set d1 and d2. We should respect it.
+                // 3 digits (100) - 2 digits (99) > 0.
+                // 2 digits - 3 digits < 0.
+                // We trust the config.
+                // BUT, if d1 == d2, we might want to ensure v1 >= v2 for Easy/Normal.
+                if (d1 === d2 && v2 > v1) {
+                     [v1, v2] = [v2, v1];
+                }
+            }
             ans = v1 - v2;
             break;
         case 'mul':
             operator = '\\times';
-            // Easy: limit one operand to 1 digit?
-            if (difficulty === 'Easy' && digits > 1) {
-                 v2 = getRandomInt(2, 9);
-            }
             ans = v1 * v2;
             break;
         case 'div':
              operator = '\\div';
-             // Easy: Divisor is single digit
-             // Hard: Divisor can be N digits
-             let dDiv = digits;
-             if (difficulty === 'Easy') dDiv = 1;
+             // Logic: v1 (Dividend) / v2 (Divisor) = ans (Quotient)
+             // User config: d1 is Dividend digits, d2 is Divisor digits?
+             // Or d1 is Quotient digits?
+             // Standard: "3 digit / 1 digit" implies 123 / 3.
+             // We need to ensure divisibility.
              
-             // Regenerate v2 based on divisor constraint
-             const divMin = Math.pow(10, dDiv - 1);
-             const divMax = Math.pow(10, dDiv) - 1;
-             v2 = getRandomInt(divMin, divMax);
+             // Regenerate v2 (Divisor)
+             v2 = getRandomInt(...getRange(d2));
              
-             // Ensure v1 is multiple
-             ans = getRandomInt(min, max); // Answer is N digits?
-             // "N digit op N digit" -> Result size?
-             // Usually Input sizes.
-             // Dividend (v1) / Divisor (v2)
-             if (difficulty === 'Easy') ans = getRandomInt(1, 10); // Small quotient
+             // We need a dividend v1 that is d1 digits AND divisible by v2.
+             // Min v1: 10^(d1-1), Max v1: 10^d1 - 1.
+             // Find multiples of v2 in this range.
              
-             v1 = ans * v2;
+             const minD1 = Math.pow(10, d1 - 1);
+             const maxD1 = Math.pow(10, d1) - 1;
+             
+             // First multiple > minD1
+             let start = Math.ceil(minD1 / v2) * v2;
+             if (start > maxD1) {
+                 // Impossible constraint (e.g. 1 digit / 4 digits -> 0.xx)
+                 // Or e.g. 2 digits / 2 digits (10 / 99). Maybe 10/10=1. 10/99=0.
+                 // Fallback: simple division
+                 if (d1 < d2) {
+                      // Just random integers, likely not integer result?
+                      // User requested integer results usually.
+                      // Adjust v1 to be v2 * something?
+                      // But that violates "d1 digits".
+                      // We must respect "d1 digits" primarily?
+                      // If impossible, retrying with new v2?
+                 }
+             }
+
+             // Let's generate Answer (Quotient) and Divisor (v2), then calc Dividend (v1).
+             // But user specified Dividend Digits (d1).
+             // So we must hunt for valid v1.
+             
+             // Optimized approach:
+             // 1. Pick v2 (d2 digits).
+             // 2. Pick v1 (d1 digits) such that v1 % v2 == 0.
+             // Range [minD1, maxD1]. 
+             // Pick random multiple.
+             
+             const minMult = Math.ceil(minD1 / v2);
+             const maxMult = Math.floor(maxD1 / v2);
+             
+             if (minMult > maxMult) {
+                 // No solution for this v2 (e.g. v2=50, d1=1 -> no multiple of 50 is 1 digit)
+                 // Fallback: Pick v1 randomly, subtract remainder.
+                 // If that changes digit count, too bad.
+                 v1 = getRandomInt(minD1, maxD1);
+                 v1 = v1 - (v1 % v2);
+                 if (v1 < minD1) v1 += v2; // Adjust back up
+                 if (v1 > maxD1) {
+                     // Still fail
+                     ans = 0; v1 = 0; // Error case
+                 } else {
+                     ans = v1 / v2;
+                 }
+             } else {
+                 const scalar = getRandomInt(minMult, maxMult);
+                 v1 = scalar * v2;
+                 ans = scalar;
+             }
+             
              break;
         case 'add':
         default:

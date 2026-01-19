@@ -20,7 +20,17 @@ const StartScreen = ({ onStart, initialConfig }) => {
         initialConfig?.topics || getAllSubtopics()
     );
     const [questionCount, setQuestionCount] = useState(initialConfig?.count || 10);
-    const [arithDigits, setArithDigits] = useState(initialConfig?.digits || 2);
+    
+    // Arithmetic Detailed Config: Now storing [d1, d2] for each op
+    const [arithConfig, setArithConfig] = useState(
+        initialConfig?.arithmetic || { 
+            add: [2, 2], 
+            sub: [2, 2], 
+            mul: [2, 1], // Default: 2 digit x 1 digit
+            div: [2, 1] 
+        }
+    );
+    
     const [difficulty, setDifficulty] = useState(initialConfig?.difficulty || 'Normal');
     const [isDebug, setIsDebug] = useState(initialConfig?.debug || false);
     
@@ -31,6 +41,14 @@ const StartScreen = ({ onStart, initialConfig }) => {
         const hasArith = selectedSubtopics.some(k => arithKeys.includes(k));
         setShowDigitConfig(hasArith);
     }, [selectedSubtopics]);
+
+    const updateArithDigit = (type, index, val) => {
+        setArithConfig(prev => {
+            const newArr = [...prev[type]];
+            newArr[index] = val;
+            return { ...prev, [type]: newArr };
+        });
+    };
 
     const toggleSubtopic = (key) => {
         if (selectedSubtopics.includes(key)) {
@@ -64,12 +82,45 @@ const StartScreen = ({ onStart, initialConfig }) => {
             onStart({ 
                 topics: selectedSubtopics, 
                 count: questionCount,
-                digits: arithDigits,
+                arithmetic: arithConfig, 
                 difficulty: difficulty,
                 debug: isDebug
             });
         }
     };
+
+    const renderDigitRow = (label, type, opSymbol) => (
+        <div className="arith-config-row">
+            <span className="arith-label">{label}</span>
+            <div className="dual-selector-container">
+                 {/* Left Operand */}
+                 <div className="digit-group">
+                     {DIGITS.map(d => (
+                        <button 
+                            key={`L-${d}`} 
+                            className={`count-btn mini ${arithConfig[type][0] === d ? 'active' : ''}`} 
+                            onClick={() => updateArithDigit(type, 0, d)}
+                        >
+                            {d}
+                        </button>
+                    ))}
+                 </div>
+                 <span className="op-divider">{opSymbol}</span>
+                 {/* Right Operand */}
+                 <div className="digit-group">
+                     {DIGITS.map(d => (
+                        <button 
+                            key={`R-${d}`} 
+                            className={`count-btn mini ${arithConfig[type][1] === d ? 'active' : ''}`} 
+                            onClick={() => updateArithDigit(type, 1, d)}
+                        >
+                            {d}
+                        </button>
+                    ))}
+                 </div>
+            </div>
+        </div>
+    );
 
     return (
         <motion.div 
@@ -153,18 +204,13 @@ const StartScreen = ({ onStart, initialConfig }) => {
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
                             >
-                                <label className="setting-label">Digits (Arithmetic)</label>
-                                <div className="count-selector">
-                                    {DIGITS.map(d => (
-                                        <button 
-                                            key={d} 
-                                            className={`count-btn ${arithDigits === d ? 'active' : ''}`}
-                                            onClick={() => setArithDigits(d)}
-                                        >
-                                            {d}
-                                        </button>
-                                    ))}
-                                </div>
+                                <label className="setting-label">Arithmetic Digits (Left op Right)</label>
+                                
+                                {renderDigitRow('Add', 'add', '+')}
+                                {renderDigitRow('Sub', 'sub', '-')}
+                                {renderDigitRow('Mul', 'mul', '×')}
+                                {renderDigitRow('Div', 'div', '÷')}
+
                             </motion.div>
                         )}
                         </AnimatePresence>
