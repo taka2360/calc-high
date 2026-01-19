@@ -66,7 +66,7 @@ export const generators = {
             return {
                 id: `mathIA_qv`,
                 subtopic: "Quad Vertex",
-                question: `y = ${poly} \\text{ の頂点坐标}`,
+                question: `y = ${poly} \\text{ の頂点座標}`,
                 answer: { values: [], display: `(${p}, ${q})` },
                 type: "math-input"
             };
