@@ -1,15 +1,81 @@
 import { getRandomInt, gcd, simplifyFraction, toLatexFraction, getScaledRandomInt } from './utils.js';
 
 export const generators = {
-    // --- Exp/Log (Extended) ---
+     // --- Derivative (New) ---
+    'diff_tangent': {
+        label: '微分の接線方程式',
+        func: (d, diff) => {
+             // y = f(x) at x = a.
+             // y - f(a) = f'(a)(x - a) => y = f'(a)x + (f(a) - a f'(a))
+             
+             // Easy: y = x^2, a = 1, 2
+             // Normal: y = x^2 + kx, or y = x^3?
+             // Hard: y = x^3 - ...
+             
+             const isCubic = diff !== 'Easy' && getRandomInt(0, 1);
+             const a = getRandomInt(1, 4) * (getRandomInt(0,1)?1:-1);
+             
+             let f_a, prime_a, polyStr;
+             
+             if (!isCubic) {
+                 // y = px^2 + qx + r
+                 const p = diff === 'Hard' ? getRandomInt(2, 3) : 1;
+                 const q = getRandomInt(-3, 3);
+                 const r = getRandomInt(-5, 5);
+                 
+                 const pStr = p===1?'':(p===-1?'-':p);
+                 const qStr = q===0?'':(q>0?`+${q}x`:`${q}x`);
+                 const rStr = r===0?'':(r>0?`+${r}`:`${r}`);
+                 polyStr = `${pStr}x^2 ${qStr} ${rStr}`;
+                 
+                 const f = (x) => p*x*x + q*x + r;
+                 const fp = (x) => 2*p*x + q;
+                 
+                 f_a = f(a);
+                 prime_a = fp(a);
+             } else {
+                 // y = x^3 - x (simple)
+                 const p = 1; 
+                 // Simple cubic to avoid huge numbers: x^3 - kx
+                 const k = getRandomInt(1, 4);
+                 polyStr = `x^3 - ${k}x`;
+                 
+                 const f = (x) => x*x*x - k*x;
+                 const fp = (x) => 3*x*x - k;
+                 
+                 f_a = f(a);
+                 prime_a = fp(a);
+             }
+             
+             // y = m x + C
+             // C = f(a) - a * m
+             const m = prime_a;
+             const C = f_a - a * m;
+             
+             const mDisplay = m===1?'':(m===-1?'-':m);
+             let cDisplay = '';
+             if (C !== 0) {
+                 cDisplay = (C > 0 && m !== 0) ? `+ ${C}` : `${C}`;
+             }
+             
+             let ans = `y = `;
+             if (m === 0) ans += `${C}`;
+             else ans += `${mDisplay}x ${cDisplay}`;
+             
+             return {
+                id: `mathII_diff_tan`,
+                question: `曲線 y = ${polyStr} \\text{ 上の点 } x=${a} \\text{ における接線の方程式}`,
+                answer: { values: [], display: ans },
+                type: "math-input"
+            };
+        }
+    },
+    
+    // --- Exp/Log (Existing) ---
     'log_eq': {
         label: '対数方程式',
         func: (digits, difficulty) => {
-            // Easy: log_a x = b
-            // Normal/Hard: Substitution (log_2 x)^2 - ... = 0
-            
-            const base = 2; // Keep base simple
-            
+            const base = 2; 
             if (difficulty === 'Easy') {
                  const b = getRandomInt(1, 4);
                  const ans = Math.pow(base, b);
@@ -21,22 +87,14 @@ export const generators = {
                     type: "math-input"
                 };
             } else {
-                // Substitution: t^2 - (a+b)t + ab = 0, where t = log_2 x
-                // Roots typically 1, 2, 3...
                 const t1 = getRandomInt(1, 3);
                 const t2 = getRandomInt(t1 + 1, 4); 
-                
-                // eq: t^2 - (t1+t2)t + t1t2 = 0
                 const B = -(t1 + t2);
                 const C = t1 * t2;
-                
-                // Actual eq: (log x)^2 + B log x + C = 0
                 const qB = B === 0 ? '' : (B > 0 ? `+ ${B}\\log_{${base}} x` : `${B}\\log_{${base}} x`);
                 const qC = C === 0 ? '' : (C > 0 ? `+ ${C}` : `${C}`);
-                
                 const ans1 = Math.pow(base, t1);
                 const ans2 = Math.pow(base, t2);
-                
                 return {
                     id: `mathII_log_sub`,
                     subtopic: "Log Eq Sub",
@@ -47,14 +105,10 @@ export const generators = {
             }
         }
     },
-    'exp_eq': { // NEW
+    'exp_eq': { 
         label: '指数方程式',
         func: (digits, diff) => {
-            // Easy: 2^x = 8
-            // Normal: 4^x - 3*2^x - 4 = 0
-            
-            const base = 2; // 2, 3
-            
+            const base = 2; 
             if (diff === 'Easy') {
                  const b = getRandomInt(2, 6);
                  const val = Math.pow(base, b);
@@ -66,25 +120,15 @@ export const generators = {
                     type: "math-input"
                 };
             } else {
-                 // Substitution: X = 2^x. X^2 ...
-                 // Roots for X needs to be positive powers of base.
-                 // e.g. X=2 (x=1), X=4 (x=2).
                  const x1 = getRandomInt(1, 2); 
-                 const x2 = getRandomInt(2, 3); // Powers
+                 const x2 = getRandomInt(2, 3); 
                  const X1 = Math.pow(base, x1);
                  const X2 = Math.pow(base, x2);
-                 
-                 // if diff=Hard, maybe one root is negative (rejected) -> X^2 - (X1-A)X - X1*A = 0
-                 // If Normal, 2 valid roots?
-                 // Let's do 2 valid for Normal.
-                 
                  const B = -(X1 + X2);
                  const C = X1 * X2;
-                 const baseSq = base * base; // 4
-                 
+                 const baseSq = base * base; 
                  const qB = B === 0 ? '' : (B > 0 ? `+ ${B}\\cdot ${base}^x` : `${B}\\cdot ${base}^x`);
                  const qC = C === 0 ? '' : (C > 0 ? `+ ${C}` : `${C}`);
-
                  return {
                     id: `mathII_exp_sub`,
                     subtopic: "Exp Eq Sub",
@@ -96,43 +140,37 @@ export const generators = {
         }
     },
     
-    // --- Trig Functions (Math II) ---
+    // --- Trig Functions (Existing) ---
     'trig_rad_deg': {
         label: '度数・弧度法変換',
         func: (d, diff) => {
-             // Easy: Deg -> Rad. Normal -> Rad -> Deg.
              const isDegToRad = getRandomInt(0, 1) === 0;
              const angles = [30, 45, 60, 90, 120, 135, 150, 180, 270, 360];
              const deg = angles[getRandomInt(0, angles.length-1)];
-             
-             // Calc Rad
              const [n, den] = simplifyFraction(deg, 180);
              let rad = n === 1 ? '\\pi' : `${n}\\pi`;
              if (den !== 1) rad = `\\frac{${rad}}{${den}}`;
              if (deg === 0) rad = '0';
-             
              if (isDegToRad) {
                  return {
                     id: `mathII_rad`,
                     question: `${deg}^\\circ \\text{ を弧度法で}`,
                     answer: { values: [], display: rad },
                     type: "math-input"
-                 };
+                };
              } else {
                  return {
                     id: `mathII_deg`,
                     question: `${rad} \\text{ を度数法で} (^{\\circ}不要)`,
                     answer: { values: [deg], display: `${deg}` },
                     type: "math-input"
-                 };
+                };
              }
         }
     },
     'trig2_eq': {
         label: '三角不等式・方程式',
-        question: 'TODO', // Merged simplified logic
         func: (d, diff) => {
-             // sin x = c
              const fn = getRandomInt(0,1) === 0 ? 'sin' : 'cos';
              const vals = [
                  {v: '1/2', ans: fn==='sin' ? ['\\pi/6', '5\\pi/6'] : ['\\pi/3', '5\\pi/3']},
@@ -140,9 +178,7 @@ export const generators = {
                  {v: '-\\frac{1}{2}', ans: fn==='sin' ? ['7\\pi/6', '11\\pi/6'] : ['2\\pi/3', '4\\pi/3']}
              ];
              const t = vals[getRandomInt(0, vals.length-1)];
-             
              let ansDisp = t.ans.join(', ');
-             
              return {
                 id: `mathII_trig_eq`,
                 question: `0 \\leqq x < 2\\pi \\text{ のとき } \\${fn} x = ${t.v}`,
@@ -152,23 +188,15 @@ export const generators = {
         }
     },
     
-    // --- Figures & Equations ---
+    // --- Figures (Existing) ---
     'fig_dist': {
         label: '2点間の距離',
         func: (d, diff) => {
-             // A(x1, y1), B(x2, y2).
-             // Make distance integer -> pythagorean triple.
              const triples = [[3,4,5], [5,12,13], [8,15,17], [6,8,10]];
              const t = triples[getRandomInt(0, triples.length-1)];
-             const dx = t[0];
-             const dy = t[1];
-             const D = t[2];
-             
-             const x1 = getRandomInt(-5, 5);
-             const y1 = getRandomInt(-5, 5);
-             const x2 = x1 + dx;
-             const y2 = y1 + dy;
-             
+             const dx = t[0]; const dy = t[1]; const D = t[2];
+             const x1 = getRandomInt(-5, 5); const y1 = getRandomInt(-5, 5);
+             const x2 = x1 + dx; const y2 = y1 + dy;
              return {
                 id: `mathII_dist`,
                 question: `A(${x1}, ${y1}), B(${x2}, ${y2}) \\text{ 間の距離}`,
@@ -180,25 +208,14 @@ export const generators = {
     'fig_divide': {
         label: '内分点・外分点',
         func: (d, diff) => {
-             // A, B, m:n.
-             // Internal: (nx1+mx2)/(m+n)
-             const m = getRandomInt(1, 3);
-             const n = getRandomInt(1, 3);
-             
+             const m = getRandomInt(1, 3); const n = getRandomInt(1, 3);
              const den = m + n;
-             // Choose x1, x2 such that result is integer.
-             // nx1 + mx2 = den * K
              const x1 = getRandomInt(-5, 5) * den; 
-             const x2 = getRandomInt(-5, 5) * den; // Lazy way: multiple of den
+             const x2 = getRandomInt(-5, 5) * den; 
              const y1 = getRandomInt(-5, 5) * den;
              const y2 = getRandomInt(-5, 5) * den;
-             
-             // Actually formula: (n x1 + m x2) / (m+n).
-             // Since x1, x2 are multiples of (m+n), result is integer.
-             
              const Px = (n*x1 + m*x2) / den;
              const Py = (n*y1 + m*y2) / den;
-             
              return {
                 id: `mathII_div`,
                 question: `A(${x1}, ${y1}), B(${x2}, ${y2}) \\text{ を } ${m}:${n} \\text{ に内分する点}`,
@@ -210,37 +227,24 @@ export const generators = {
     'fig_line': {
         label: '2点を通る直線',
         func: (d, diff) => {
-             // y - y1 = m (x - x1)
              const x1 = getRandomInt(-3, 3);
              const y1 = getRandomInt(-3, 3);
-             const x2 = x1 + getRandomInt(1, 4); // ensure x1 != x2
+             const x2 = x1 + getRandomInt(1, 4); 
              const y2 = y1 + getRandomInt(1, 4) * (getRandomInt(0,1)?1:-1);
-             
-             const mNum = y2 - y1;
-             const mDen = x2 - x1;
+             const mNum = y2 - y1; const mDen = x2 - x1;
              const [smn, smd] = simplifyFraction(mNum, mDen);
-             
-             // y = mx + c
-             // c = y1 - m x1
-             // c = (y1*smd - smn*x1)/smd
              const cNum = y1 * smd - smn * x1;
-             
              let mStr = toLatexFraction(smn, smd);
-             if (mStr === '1') mStr = '';
-             if (mStr === '-1') mStr = '-';
-             
+             if (mStr === '1') mStr = ''; if (mStr === '-1') mStr = '-';
              let cStr = '';
              if (cNum !== 0) {
                  const [cn, cd] = simplifyFraction(cNum, smd);
                  const cf = toLatexFraction(cn, cd);
                  cStr = (cn > 0 && cf[0] !== '-') ? `+ ${cf}` : cf;
              }
-             
-             // x term
              let q = `y = `;
              if (smn === 0) q = `y = ${toLatexFraction(cNum, smd)}`;
              else q += `${mStr}x ${cStr}`;
-             
              return {
                 id: `mathII_line`,
                 question: `2点 (${x1}, ${y1}), (${x2}, ${y2}) \\text{ を通る直線}`,
@@ -252,28 +256,14 @@ export const generators = {
     'fig_dist_line': {
         label: '点と直線の距離',
         func: (d, diff) => {
-             // |ax0 + by0 + c| / sqrt(a^2 + b^2)
-             // Need sqrt(a^2+b^2) to be integer -> 3,4,5 etc.
              const triples = [[3,4,5], [6,8,10], [5,12,13]];
              const t = triples[getRandomInt(0, triples.length-1)];
-             const a = t[0];
-             const b = t[1] * (getRandomInt(0,1)?1:-1);
-             const den = t[2];
-             
-             const x0 = getRandomInt(-5, 5);
-             const y0 = getRandomInt(-5, 5);
-             
-             // Need numerator to be multiple of den
-             // ax0 + by0 + c = den * K
-             // c = den*K - ax0 - by0
+             const a = t[0]; const b = t[1] * (getRandomInt(0,1)?1:-1); const den = t[2];
+             const x0 = getRandomInt(-5, 5); const y0 = getRandomInt(-5, 5);
              const K = getRandomInt(1, 5);
              const c = (den * K) - (a * x0) - (b * y0);
-             
              const dist = K;
-             
-             // Line: ax + by + c = 0
              const lineEq = `${a}x ${b>=0?'+':''}${b}y ${c>=0?'+':''}${c} = 0`;
-             
              return {
                 id: `mathII_pt_line`,
                 question: `点 (${x0}, ${y0}) \\text{ と直線 } ${lineEq} \\text{ の距離}`,
@@ -285,37 +275,9 @@ export const generators = {
     'fig_circle_3pts': {
         label: '3点を通る円',
         func: (d, diff) => {
-             // (x-a)^2 + (y-b)^2 = r^2
-             // Generate center (a, b) and radius r^2
-             const a = getRandomInt(-3, 3);
-             const b = getRandomInt(-3, 3);
-             const rSq = getRandomInt(1, 10) * 5; // e.g. 5, 25...
-             
-             // Find 3 integer points on circle? Hard.
-             // Actually, asking for Equation given 3 points is TEDIOUS for mental math.
-             // User input: x^2 + y^2 + lx + my + n = 0 ?
-             // Or (x-a)^2 + ...
-             // Maybe provide center and one point? "円の方程式" usually means "Find Eq".
-             // Easy: Center (a,b), Point P.
-             // Hard: 3 Points.
-             
-             // Let's stick to Center + Point (Easy/Normal) for Speed Math.
-             // 3 Points is too solving-heavy.
-             // Wait, user asked "3点の座標からの円の方程式".
-             // OK. We must afford it.
-             // To make it solvable mentally: 
-             // Points should be nice. e.g. (0,0), (something, 0), (0, something).
-             // General form: x^2 + y^2 + lx + my + n = 0.
-             // If passes (0,0) -> n=0.
-             // Passes (p, 0) -> p^2 + lp = 0 -> l = -p.
-             // Passes (0, q) -> q^2 + mq = 0 -> m = -q.
-             
-             const p = getRandomInt(2, 6) * 2; // even
-             const q = getRandomInt(2, 6) * 2;
-             
-             const eq = `x^2 + y^2 - ${p}x - ${q}y = 0`;
+             const p = getRandomInt(2, 6) * 2; 
+             const q = getRandomInt(2, 6) * 2; 
              const ansFormat = `(x-${p/2})^2 + (y-${q/2})^2 = ${(p/2)**2 + (q/2)**2}`;
-             
              return {
                 id: `mathII_circle_3pts`,
                 question: `3点 (0,0), (${p},0), (0,${q}) \\text{ を通る円の方程式}`,
@@ -327,15 +289,9 @@ export const generators = {
     'fig_circle_tan': {
         label: '円の接線',
         func: (d, diff) => {
-             // x1 x + y1 y = r^2
-             // Point (x1, y1) must be ON circle x^2+y^2=r^2.
-             // Pyth triples again.
              const triples = [[3,4,5], [5,12,13], [8,15,17]];
              const t = triples[getRandomInt(0, triples.length-1)];
-             const x1 = t[0];
-             const y1 = t[1];
-             const r = t[2];
-             
+             const x1 = t[0]; const y1 = t[1]; const r = t[2];
              return {
                 id: `mathII_tan`,
                 question: `円 x^2+y^2=${r*r} \\text{ 上の点 } (${x1}, ${y1}) \\text{ における接線}`,
@@ -344,8 +300,6 @@ export const generators = {
              };
         }
     },
-    
-    // --- Existing (Remainder, Def Int) ---
     'remainder_thm': {
         label: '剰余の定理',
         func: (digits, difficulty) => {

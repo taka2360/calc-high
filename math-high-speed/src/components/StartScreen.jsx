@@ -35,6 +35,18 @@ const StartScreen = ({ onStart, initialConfig }) => {
     const [isDebug, setIsDebug] = useState(initialConfig?.debug || false);
     
     const [showDigitConfig, setShowDigitConfig] = useState(false);
+    const [debugClicks, setDebugClicks] = useState(0);
+
+    const handleSecretDebug = () => {
+        setDebugClicks(prev => {
+            const next = prev + 1;
+            if (next >= 5) {
+                setIsDebug(curr => !curr);
+                return 0; // Reset
+            }
+            return next;
+        });
+    };
 
     useEffect(() => {
         const arithKeys = Object.keys(ALL_TOPICS['Arithmetic'].subtopics);
@@ -52,24 +64,21 @@ const StartScreen = ({ onStart, initialConfig }) => {
 
     const toggleSubtopic = (key) => {
         if (selectedSubtopics.includes(key)) {
-            if (selectedSubtopics.length > 1) {
-                setSelectedSubtopics(selectedSubtopics.filter(k => k !== key));
-            }
+            setSelectedSubtopics(selectedSubtopics.filter(k => k !== key));
         } else {
             setSelectedSubtopics([...selectedSubtopics, key]);
         }
     };
 
-    const toggleCategory = (catKey) => {
+    const selectAllInCategory = (catKey) => {
         const catSubtopics = Object.keys(ALL_TOPICS[catKey].subtopics);
-        const allSelected = catSubtopics.every(k => selectedSubtopics.includes(k));
-        
-        if (allSelected) {
-            setSelectedSubtopics(selectedSubtopics.filter(k => !catSubtopics.includes(k)));
-        } else {
-            const newSet = new Set([...selectedSubtopics, ...catSubtopics]);
-            setSelectedSubtopics(Array.from(newSet));
-        }
+        const newSet = new Set([...selectedSubtopics, ...catSubtopics]);
+        setSelectedSubtopics(Array.from(newSet));
+    };
+
+    const clearCategory = (catKey) => {
+        const catSubtopics = Object.keys(ALL_TOPICS[catKey].subtopics);
+        setSelectedSubtopics(selectedSubtopics.filter(k => !catSubtopics.includes(k)));
     };
 
     const isCategorySelected = (catKey) => {
@@ -137,13 +146,12 @@ const StartScreen = ({ onStart, initialConfig }) => {
                             <div key={catKey} className="topic-category">
                                 <div className="category-header">
                                     <label>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={isCategorySelected(catKey)}
-                                            onChange={() => toggleCategory(catKey)}
-                                        />
                                         {catVal.label}
                                     </label>
+                                    <div className="cat-actions">
+                                        <button className="text-btn" onClick={() => selectAllInCategory(catKey)}>All</button>
+                                        <button className="text-btn" onClick={() => clearCategory(catKey)}>Clear</button>
+                                    </div>
                                 </div>
                                 <div className="subtopic-grid">
                                     {Object.entries(catVal.subtopics).map(([subKey, subVal]) => (
@@ -164,7 +172,14 @@ const StartScreen = ({ onStart, initialConfig }) => {
 
                 <div className="start-sidebar-col">
                     <div className="sidebar-section">
-                        <h2 className="section-title">Settings</h2>
+                        <h2 
+                            className="section-title" 
+                            onClick={handleSecretDebug}
+                            style={{ cursor: 'pointer', userSelect: 'none' }}
+                        >
+                           Settings
+                           {isDebug && <span style={{fontSize: '0.6rem', color: 'var(--accent-color)', marginLeft: '10px'}}>★</span>}
+                        </h2>
                         
                         <div className="setting-group">
                             <label className="setting-label">Difficulty</label>
@@ -215,16 +230,19 @@ const StartScreen = ({ onStart, initialConfig }) => {
                         )}
                         </AnimatePresence>
                         
-                        <div className="setting-group debug-toggle">
-                             <label>
-                                <input 
-                                    type="checkbox" 
-                                    checked={isDebug}
-                                    onChange={(e) => setIsDebug(e.target.checked)}
-                                />
-                                Debug Mode
-                            </label>
-                        </div>
+                        {/* Debug Toggle Hidden */}
+                        {isDebug && (
+                             <div className="setting-group debug-toggle">
+                                 <label>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={isDebug}
+                                        onChange={(e) => setIsDebug(e.target.checked)}
+                                    />
+                                    Debug Mode Allowed
+                                </label>
+                            </div>
+                        )}
                     </div>
 
                     <motion.button 

@@ -45,9 +45,11 @@ const MathKeyboard = ({ onInput, onDelete, onSubmit }) => {
     { label: '1', value: '1' }, { label: '2', value: '2' }, { label: '3', value: '3' }, { label: '-', value: '-', type: 'op' }, { label: '^', value: '^', type: 'op' },
     // Row 4
     { label: '0', value: '0' }, { label: '.', value: '.' }, { label: ',', value: ',' }, { label: '+', value: '+', type: 'op' }, { label: '√', value: 'sqrt(', type: 'fn' },
-    // Row 5
+    // Row 5 (Inequalities)
+    { label: '<', value: '<', type: 'op' }, { label: '>', value: '>', type: 'op' }, { label: '≦', value: '<=', type: 'op' }, { label: '≧', value: '>=', type: 'op' }, { label: '=', value: '=', type: 'op' },
+    // Row 6
     { label: 'x', value: 'x', type: 'var' }, { label: 'y', value: 'y', type: 'var' }, { label: 'n', value: 'n', type: 'var' }, { label: 'θ', value: '\\theta', type: 'var' }, enterKey,
-    // Row 6 (Legacy vars/funcs)
+    // Row 7 (Legacy vars/funcs)
     { label: '(', value: '(' }, { label: ')', value: ')' }, { label: 'log', value: 'log(', type: 'fn' }, { label: 'sin', value: 'sin(', type: 'fn' }, { label: 'cos', value: 'cos(', type: 'fn' }, { label: 'π', value: '\\pi' }
   ];
   // Note: Standard layout map rendering might look weird if count % 5 != 0.
@@ -65,9 +67,31 @@ const MathKeyboard = ({ onInput, onDelete, onSubmit }) => {
       { label: 'sin', value: 'sin(', type: 'fn' }, { label: 'cos', value: 'cos(', type: 'fn' }, { label: 'log', value: 'log(', type: 'fn' }, { label: 'π', value: '\\pi' }, { label: '1', value: '1' }, { label: '2', value: '2' }, { label: '3', value: '3' },
       // Row 4
       { label: '+', value: '+', type: 'op' }, { label: '-', value: '-', type: 'op' }, { label: '×', value: '*', type: 'op' }, { label: '÷', value: '/', type: 'op' }, { label: '.', value: '.' }, { label: '0', value: '0' }, { label: ',', value: ',' },
-  ];
-  
-  const activeLayout = isWide ? [...wideKeys, { label: 'DEL', action: 'delete', type: 'action' }, { label: 'AC', action: 'clear', type: 'action' }, enterKey] : standardLayout;
+      // Row 5
+      { label: '<', value: '<', type: 'op' }, { label: '>', value: '>', type: 'op' }, { label: '≦', value: '<=', type: 'op' }, { label: '≧', value: '>=', type: 'op' }, { label: '=', value: '=', type: 'op' },
+    ];
+    
+    // Add spacer in Wide Layout if needed to align DEL/AC/Enter or just let them flow.
+    // Wide list flows into activeLayout. 
+    // wideKeys has 4 rows * 7 = 28 items. + 5 items = 33 items.
+    // activeLayout appends DEL, AC, Enter (3 items) -> 36 items.
+    // 36 items / 7 cols = 5 rows + 1 item.
+    // This leaves the last row empty except for Enter?
+    // Let's add spacers or rearrange.
+    // Current wideKeys row 5 has 5 inequality keys.
+    // Then DEL, AC, Enter appended.
+    // 5 + 3 = 8 items. Fits in 7 cols? No, 8 > 7. 
+    // So Row 5 will have 7 items, Row 6 has 1 item.
+    // To make it formatted:
+    // Append DEL, AC to wideKeys row 5.
+    // Then Enter is appended by activeLayout logic? No, activeLayout constructs it.
+    
+    const activeLayout = isWide ? [
+        ...wideKeys, 
+        { label: 'DEL', action: 'delete', type: 'action' }, 
+        { label: 'AC', action: 'clear', type: 'action' },
+        enterKey 
+    ] : standardLayout;
 
   return (
     <div className={`math-keyboard ${isWide ? 'wide-layout' : ''}`}>

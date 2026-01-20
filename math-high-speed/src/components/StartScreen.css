@@ -10,6 +10,15 @@
     gap: 2rem;
 }
 
+.category-header {
+    display: flex;
+    justify-content: space-between; /* Separate label and actions */
+    align-items: center;
+    gap: 1rem; /* Minimum gap */
+    width: 100%;
+    margin-bottom: 8px; /* Space between header and items */
+}
+
 .section-title {
     font-size: 1.1rem;
     color: var(--text-secondary);
@@ -95,17 +104,29 @@
 }
 
 .category-header input[type="checkbox"] {
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--text-secondary);
-    border-radius: 4px;
-    background: transparent;
+    cursor: pointer;
+    flex: 1;
 }
-.category-header input[type="checkbox"]:checked {
-    background: var(--accent-color);
-    border-color: var(--accent-color);
-    box-shadow: 0 0 8px var(--accent-color);
+
+.cat-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.text-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.text-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border-color: rgba(255,255,255,0.5);
 }
 
 /* Sidebar & Settings */

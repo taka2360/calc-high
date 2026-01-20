@@ -19,7 +19,7 @@ const formatInputDisplay = (raw) => {
         .replace(/\\frac/g, 'frac');
 };
 
-const GameScreen = ({ config, onFinish, onHome }) => { // Added onHome
+const GameScreen = ({ config, onFinish, onHome }) => { 
     const [problems, setProblems] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [userInput, setUserInput] = useState('');
@@ -28,6 +28,7 @@ const GameScreen = ({ config, onFinish, onHome }) => { // Added onHome
     const [results, setResults] = useState([]); 
     const [isWrong, setIsWrong] = useState(false);
     const [isTimeOver, setIsTimeOver] = useState(false); 
+    const [showSuccess, setShowSuccess] = useState(false); // New Success State
     
     // Gamification State
     const [combo, setCombo] = useState(0);
@@ -88,14 +89,38 @@ const GameScreen = ({ config, onFinish, onHome }) => { // Added onHome
         setResults(newResults);
 
         if (currentIndex < problems.length - 1) {
+            // Wait a bit for success animation if applied?
+            // User requested "Refreshing effect".
+            // Let's create a small delay before navigating if correct?
+            // Actually fast math games usually are instant.
+            
+            // If correct, flash success then change.
+            // But we change question immediately. 
+            // The success effect should play ON TOP of the new question transition?
+            // Or delay?
+            // Let's trigger success anim, allow it to play OVER the transition for "refreshing" flow.
+            
+            if (isCorrect && !skipped && !isTimeOver) {
+                setShowSuccess(true);
+                setTimeout(() => setShowSuccess(false), 500);
+            }
+            
             setCurrentIndex(prev => prev + 1);
             setUserInput('');
             setTimeLeft(TIME_LIMIT);
             setIsWrong(false);
             setIsTimeOver(false);
         } else {
-            // Pass max combo to finish
-            onFinish(newResults, newCombo > maxCombo ? newCombo : maxCombo);
+            // Last question
+            if (isCorrect && !skipped && !isTimeOver) {
+                 setShowSuccess(true);
+                 setTimeout(() => {
+                    setShowSuccess(false);
+                    onFinish(newResults, newCombo > maxCombo ? newCombo : maxCombo);
+                 }, 500); // Wait for anim
+            } else {
+                 onFinish(newResults, newCombo > maxCombo ? newCombo : maxCombo);
+            }
         }
     };
 
@@ -136,6 +161,9 @@ const GameScreen = ({ config, onFinish, onHome }) => { // Added onHome
 
     return (
         <div className="game-screen">
+            {/* SUCCESS OVERLAY */}
+            {showSuccess && <div className="success-overlay" />}
+            
             <button className="game-home-btn" onClick={onHome}>🏠</button>
             
             <div className="game-header">
@@ -163,7 +191,7 @@ const GameScreen = ({ config, onFinish, onHome }) => { // Added onHome
                         initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
                         animate={{ opacity: 1, scale: 1.2, rotate: -5 }}
                         exit={{ opacity: 0, scale: 0 }}
-                        key={combo} // Re-trigger animation on change
+                        key={combo} 
                     >
                         {combo} COMBO!
                     </motion.div>

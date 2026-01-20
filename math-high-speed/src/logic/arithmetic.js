@@ -2,133 +2,180 @@ import { getRandomInt } from './utils.js';
 
 // digits: number OR [number, number]
 export const generateArithmetic = (digitsConfig = 1, difficulty = 'Normal', opType = 'add') => {
-    // Parse digits configuration
-    let d1, d2;
-    if (Array.isArray(digitsConfig)) {
-        d1 = digitsConfig[0];
-        d2 = digitsConfig[1];
-    } else {
-        d1 = digitsConfig;
-        d2 = digitsConfig;
-    }
+    // Basic Arithmetic Logic (Existing)
+    if (opType !== 'mixed') {
+         let d1, d2;
+        if (Array.isArray(digitsConfig)) {
+            d1 = digitsConfig[0];
+            d2 = digitsConfig[1];
+        } else {
+            d1 = digitsConfig || 2;
+            d2 = digitsConfig || 2;
+        }
 
-    const getRange = (d) => {
-        const min = Math.pow(10, d - 1);
-        const max = Math.pow(10, d) - 1;
-        return [min, max];
-    };
+        const getRange = (d) => {
+            const min = Math.pow(10, d - 1);
+            const max = Math.pow(10, d) - 1;
+            return [min, max];
+        };
 
-    let v1 = getRandomInt(...getRange(d1));
-    let v2 = getRandomInt(...getRange(d2));
-    
-    let ans, operator;
+        let v1 = getRandomInt(...getRange(d1));
+        let v2 = getRandomInt(...getRange(d2));
+        
+        let ans, operator;
 
-    switch(opType) {
-        case 'sub':
-            operator = '-';
-            // If strictly positive result required? usually yes.
-            // If Hard, negative allowed.
-            if (difficulty !== 'Hard') {
-                // Ensure v1 >= v2.
-                // But if user requested 1 digit - 3 digits? Result is neg.
-                // If config explicitly asks for d1 < d2, we allow neg.
-                // If config allows random swap, we might swap.
-                // Here, user explicitly set d1 and d2. We should respect it.
-                // 3 digits (100) - 2 digits (99) > 0.
-                // 2 digits - 3 digits < 0.
-                // We trust the config.
-                // BUT, if d1 == d2, we might want to ensure v1 >= v2 for Easy/Normal.
-                if (d1 === d2 && v2 > v1) {
-                     [v1, v2] = [v2, v1];
+        switch(opType) {
+            case 'sub':
+                operator = '-';
+                if (difficulty !== 'Hard') {
+                    if (d1 === d2 && v2 > v1) {
+                         [v1, v2] = [v2, v1];
+                    }
                 }
-            }
-            ans = v1 - v2;
-            break;
-        case 'mul':
-            operator = '\\times';
-            ans = v1 * v2;
-            break;
-        case 'div':
-             operator = '\\div';
-             // Logic: v1 (Dividend) / v2 (Divisor) = ans (Quotient)
-             // User config: d1 is Dividend digits, d2 is Divisor digits?
-             // Or d1 is Quotient digits?
-             // Standard: "3 digit / 1 digit" implies 123 / 3.
-             // We need to ensure divisibility.
-             
-             // Regenerate v2 (Divisor)
-             v2 = getRandomInt(...getRange(d2));
-             
-             // We need a dividend v1 that is d1 digits AND divisible by v2.
-             // Min v1: 10^(d1-1), Max v1: 10^d1 - 1.
-             // Find multiples of v2 in this range.
-             
-             const minD1 = Math.pow(10, d1 - 1);
-             const maxD1 = Math.pow(10, d1) - 1;
-             
-             // First multiple > minD1
-             let start = Math.ceil(minD1 / v2) * v2;
-             if (start > maxD1) {
-                 // Impossible constraint (e.g. 1 digit / 4 digits -> 0.xx)
-                 // Or e.g. 2 digits / 2 digits (10 / 99). Maybe 10/10=1. 10/99=0.
-                 // Fallback: simple division
-                 if (d1 < d2) {
-                      // Just random integers, likely not integer result?
-                      // User requested integer results usually.
-                      // Adjust v1 to be v2 * something?
-                      // But that violates "d1 digits".
-                      // We must respect "d1 digits" primarily?
-                      // If impossible, retrying with new v2?
-                 }
-             }
-
-             // Let's generate Answer (Quotient) and Divisor (v2), then calc Dividend (v1).
-             // But user specified Dividend Digits (d1).
-             // So we must hunt for valid v1.
-             
-             // Optimized approach:
-             // 1. Pick v2 (d2 digits).
-             // 2. Pick v1 (d1 digits) such that v1 % v2 == 0.
-             // Range [minD1, maxD1]. 
-             // Pick random multiple.
-             
-             const minMult = Math.ceil(minD1 / v2);
-             const maxMult = Math.floor(maxD1 / v2);
-             
-             if (minMult > maxMult) {
-                 // No solution for this v2 (e.g. v2=50, d1=1 -> no multiple of 50 is 1 digit)
-                 // Fallback: Pick v1 randomly, subtract remainder.
-                 // If that changes digit count, too bad.
-                 v1 = getRandomInt(minD1, maxD1);
-                 v1 = v1 - (v1 % v2);
-                 if (v1 < minD1) v1 += v2; // Adjust back up
-                 if (v1 > maxD1) {
-                     // Still fail
-                     ans = 0; v1 = 0; // Error case
+                ans = v1 - v2;
+                break;
+            case 'mul':
+                operator = '\\times';
+                ans = v1 * v2;
+                break;
+            case 'div':
+                 operator = '\\div';
+                 const minD1 = Math.pow(10, d1 - 1);
+                 const maxD1 = Math.pow(10, d1) - 1;
+                 const minMult = Math.ceil(minD1 / v2);
+                 const maxMult = Math.floor(maxD1 / v2);
+                 if (minMult > maxMult) {
+                     v1 = getRandomInt(minD1, maxD1);
+                     v1 = v1 - (v1 % v2);
+                     if (v1 < minD1) v1 += v2;
+                     if (v1 > maxD1) { ans = 0; v1 = 0; } else { ans = v1 / v2; }
                  } else {
-                     ans = v1 / v2;
+                     const scalar = getRandomInt(minMult, maxMult);
+                     v1 = scalar * v2;
+                     ans = scalar;
                  }
-             } else {
-                 const scalar = getRandomInt(minMult, maxMult);
-                 v1 = scalar * v2;
-                 ans = scalar;
-             }
+                 break;
+            case 'add':
+            default:
+                operator = '+';
+                ans = v1 + v2;
+                break;
+        }
+        return {
+            id: `arith_${opType}_${Date.now()}_${Math.random()}`,
+            subtopic: `Arithmetic (${opType})`,
+            question: `${v1} ${operator} ${v2}`,
+            answer: { values: [ans], display: `${ans}` },
+            type: "math-input"
+        };
+    } else {
+        // --- AUTO-GENERATED MIXED CALCULATION ---
+        // Easy: Depth 2 (3-4 numbers). Old "Normal".
+        // Normal: Depth 3 with heavy pruning (approx 5-6 numbers).
+        // Hard: Depth 3 full (approx 6-8 numbers).
+        
+        let MAX_DEPTH, BRANCH_CHANCE;
+        
+        if (difficulty === 'Easy') {
+            MAX_DEPTH = 2;
+            BRANCH_CHANCE = 0.5; // Some branching to depth 2
+        } else if (difficulty === 'Normal') {
+            MAX_DEPTH = 3;
+            BRANCH_CHANCE = 0.4; // Aggressive pruning at lower depths
+        } else {
+            MAX_DEPTH = 3;
+            BRANCH_CHANCE = 0.8; // High branching
+        }
+        
+        const MAX_VAL = difficulty === 'Hard' ? 9 : 5;
+        
+        const ops = [
+            { sym: '+', eval: (a,b)=>a+b, priority: 1, lat: '+' },
+            { sym: '-', eval: (a,b)=>a-b, priority: 1, lat: '-' },
+            { sym: '*', eval: (a,b)=>a*b, priority: 2, lat: '\\times' }
+        ];
+        
+        const generateTree = (depth) => {
+            // Leaf condition
+            if (depth === 0) {
+                return { type: 'num', val: getRandomInt(1, MAX_VAL) };
+            }
+            
+            // Branch condition
+            // If depth is high, more likely to branch?
+            // Actually recursion goes down: depth=MAX -> depth=0.
+            // When depth=MAX, we WANT to branch (unless easy).
+            // Let's modify: passed depth is REMAINING depth.
+            
+            // Chance to stop early
+            // If difficulty is Easy, and depth=2 (start), we must branch.
+            // If depth=1, we might stop.
+            
+            let shouldBranch = true;
+            if (difficulty === 'Easy' && depth < 2 && Math.random() > 0.5) shouldBranch = false;
+            // For Normal/Hard, we want deeper trees.
+            if (difficulty !== 'Easy' && depth < MAX_DEPTH && Math.random() > BRANCH_CHANCE) shouldBranch = false;
              
-             break;
-        case 'add':
-        default:
-            operator = '+';
-            ans = v1 + v2;
-            break;
-    }
+             // Base constraint
+            if (depth === 0) shouldBranch = false;
 
-    return {
-        id: `arith_${opType}_${Date.now()}_${Math.random()}`,
-        subtopic: `Arithmetic (${opType})`,
-        question: `${v1} ${operator} ${v2}`,
-        answer: { values: [ans], display: `${ans}` },
-        type: "math-input"
-    };
+            if (!shouldBranch) {
+                 return { type: 'num', val: getRandomInt(1, MAX_VAL) };
+            }
+            
+            const op = ops[getRandomInt(0, 2)];
+            let left = generateTree(depth - 1);
+            let right = generateTree(depth - 1);
+            
+            return { type: 'op', op: op, left: left, right: right };
+        };
+        
+        const processTree = (node) => {
+            if (node.type === 'num') {
+                return { str: `${node.val}`, val: node.val, priority: 3 }; 
+            }
+            
+            const l = processTree(node.left);
+            const r = processTree(node.right);
+            
+            const val = node.op.eval(l.val, r.val);
+            
+            let sL = l.str;
+            let sR = r.str;
+            
+            const needsBracket = (childNode, childPrio, isRight) => {
+                 if (childPrio < node.op.priority) return true;
+                 if (childPrio === node.op.priority) {
+                     if (isRight && (node.op.sym === '-' || node.op.sym === '/')) return true;
+                 }
+                 return false;
+            };
+            
+            if (needsBracket(node.left, l.priority, false)) sL = `(${sL})`;
+            if (needsBracket(node.right, r.priority, true)) sR = `(${sR})`;
+            
+            return { str: `${sL} ${node.op.lat} ${sR}`, val: val, priority: node.op.priority };
+        };
+        
+        let tree, res;
+        let attempts = 0;
+        do {
+           tree = generateTree(MAX_DEPTH);
+           // Retry if simple number
+           if (tree.type === 'num') continue; 
+           
+           res = processTree(tree);
+           attempts++;
+        } while (attempts < 5 && (res.val === 0)); 
+        
+        return {
+            id: `arith_mixed_${Date.now()}_${Math.random()}`,
+            subtopic: "Mixed Operations",
+            question: res.str,
+            answer: { values: [res.val], display: `${res.val}` },
+            type: "math-input"
+        };
+    }
 };
 
 export const generators = {
@@ -136,4 +183,5 @@ export const generators = {
     'arith_sub': { label: '減算 (-)', func: (d, diff) => generateArithmetic(d, diff, 'sub') },
     'arith_mul': { label: '乗算 (×)', func: (d, diff) => generateArithmetic(d, diff, 'mul') },
     'arith_div': { label: '除算 (÷)', func: (d, diff) => generateArithmetic(d, diff, 'div') },
+    'arith_mixed': { label: '四則混合 (Mixed)', func: (d, diff) => generateArithmetic(d, diff, 'mixed') },
 };

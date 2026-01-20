@@ -1,5 +1,4 @@
 /* ... Previous styles ... */
-/* Retaining existing styles, updating .latex-question and adding media queries */
 
 .game-screen {
     display: flex;
@@ -10,6 +9,25 @@
     box-sizing: border-box;
     position: relative;
     overflow: hidden; 
+}
+
+/* SUCCESS EFFECT OVERLAY */
+.success-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(0, 224, 255, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    z-index: 20;
+    animation: successFlash 0.5s ease-out;
+}
+
+@keyframes successFlash {
+    0% { opacity: 0.6; transform: scale(0.9); }
+    100% { opacity: 0; transform: scale(1.2); }
 }
 
 .game-home-btn {
@@ -67,23 +85,28 @@
     width: 100%;
     overflow-y: auto; 
     min-height: 0; 
-    padding: 0 10px; /* Safety padding */
+    padding: 0 10px;
 }
 
-/* RESPONSIVE TEXT SIZE */
+/* RESPONSIVE TEXT SIZE & WRAPPING - V12 CHECK */
 .latex-question {
-    font-size: 2.5rem; 
+    font-size: 2.2rem; 
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     text-align: center;
     padding: 1rem;
-    word-break: break-word; 
-    width: 100%; /* Ensure it respects container */
+    
+    /* V12 Fixes: Wrap text aggressively */
+    width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word; /* Ensure wrapping */
+    white-space: normal;      /* Allow wrapping */
+    line-height: 1.4;
 }
 
 /* Narrow screens (Mobile Portrait) */
 @media (max-width: 480px) {
     .latex-question {
-        font-size: 1.4rem; /* Significantly smaller */
+        font-size: 1.2rem; /* Even smaller for mobile */
         padding: 0.5rem;
     }
 }
@@ -91,7 +114,7 @@
 /* Small Tablets / Large Phones */
 @media (min-width: 481px) and (max-width: 768px) {
     .latex-question {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
     }
 }
 
